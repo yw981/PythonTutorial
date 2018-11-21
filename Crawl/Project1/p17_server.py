@@ -27,10 +27,13 @@ class StudentDB:
     def insertRow(self, No, Name, Sex, Age):
         res = {}
         try:
-            self.cursor.execute("insert into students (No,Name,Sex,Age) values (?,?,?,?)", (No, Name, Sex, Age))
+            sql = "insert into students (No,Name,Sex,Age) values ('%s','%s','%s','%s')" % (No, Name, Sex, Age)
+            print(sql)
+            self.cursor.execute(sql)
             res["msg"] = "OK"
         except Exception as err:
             res["msg"] = str(err)
+        print(res)
         return res
 
     def deleteRow(self, No):
@@ -76,6 +79,7 @@ def process():
         Sex = flask.request.values.get("Sex") if "Sex" in flask.request.values else ""
         Age = flask.request.values.get("Age") if "Age" in flask.request.values else ""
         res = db.insertRow(No, Name, Sex, Age)
+        print("insert res")
     elif opt == "delete":
         No = flask.request.values.get("No") if "No" in flask.request.values else ""
         res = db.deleteRow(No)

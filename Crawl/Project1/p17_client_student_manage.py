@@ -15,21 +15,21 @@ class Student:
 students = []
 url = "http://127.0.0.1:5000"
 
-def listStudents(self):
+def listStudents():
     global students
     print("%-16s %-16s %-8s %-4s" % ("No", "Name", "Sex", "Age"))
     for s in students:
         s.show()
 
-def insertStudent(self):
+def insertStudent(s):
     global students
     i = 0
-    while (i < len(students) and self.No > students[i].No):
+    while (i < len(students) and s.No > students[i].No):
         i = i + 1
-    if (i < len(students) and self.No == students[i].No):
-        print(self.No + " already exists")
-    return False
-    students.insert(i, self)
+    if (i < len(students) and s.No == students[i].No):
+        print(s.No + " already exists")
+        return False
+    students.insert(i, s)
     return True
 
 def deleteRow():
@@ -71,27 +71,27 @@ def insertRow():
         Age = int(Age)
     if No != "" and Name != "":
         s = Student(No, Name, Sex, Age)
-    for x in students:
-        if (x.No == No):
-            print(No + " already exists")
-            return
-            st=""
-            try:
-                st = "No=" + urllib.request.quote(No) + "&Name=" + urllib.request.quote(Name) + "&Sex=" + urllib.request.quote(Sex) + "&Age=" + str(Age)
-                st = st.encode()
-                content = urllib.request.urlopen(url + "?opt=insert", st)
-                st = content.read()
-                st = json.loads(st.decode())
-                st=st["msg"]
-            except Exception as exp:
-                st = str(exp)
-            if (st == "OK"):
-                insertStudent(s)
-                print("增加成功")
-            else:
-                print(st)
+        for x in students:
+            if (x.No == No):
+                print(No + " already exists")
+                return
+        st=""
+        try:
+            st = "No=" + urllib.request.quote(No) + "&Name=" + urllib.request.quote(Name) + "&Sex=" + urllib.request.quote(Sex) + "&Age=" + str(Age)
+            st = st.encode()
+            content = urllib.request.urlopen(url + "?opt=insert", st)
+            st = content.read()
+            st = json.loads(st.decode())
+            st=st["msg"]
+        except Exception as exp:
+            st = str(exp)
+        if (st == "OK"):
+            insertStudent(s)
+            print("增加成功")
         else:
-            print("学号、姓名不能为空")
+            print(st)
+    else:
+        print("学号、姓名不能为空")
 
 
 def initialize():
