@@ -23,6 +23,6 @@ def show_images(mnist, start, width, height):
 
 
 if __name__ == '__main__':
-    mnist = input_data.read_data_sets("./data/", one_hot=True)
+    mnist = input_data.read_data_sets("../data/", one_hot=True)
     show_images(mnist, 0, 10, 4)
 
