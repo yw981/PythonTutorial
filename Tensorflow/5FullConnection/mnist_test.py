@@ -32,6 +32,7 @@ def test(mnist):
                 else:
                     print('No checkpoint file found')
                     return
+            return
             time.sleep(TEST_INTERVAL_SECS)
 
 def main():
