@@ -3,6 +3,11 @@
 **/data
 *.npy
 **/pic
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.gif
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
