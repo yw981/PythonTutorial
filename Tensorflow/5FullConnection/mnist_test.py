@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 import mnist_forward
 import mnist_backward
+import numpy as np
 TEST_INTERVAL_SECS = 5
 
 # 必须先运行mnist_backward训练
@@ -27,7 +28,13 @@ def test(mnist):
                 if ckpt and ckpt.model_checkpoint_path:
                     saver.restore(sess, ckpt.model_checkpoint_path)
                     global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+                    # print(mnist.test.images)
+                    print(np.array(mnist.test.images).shape)
+                    pred_result = sess.run(correct_prediction, feed_dict={x: mnist.test.images, y_: mnist.test.labels})
+                    print("Result " , pred_result)
+
                     accuracy_score = sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels})
+
                     print("After %s training step(s), test accuracy = %g" % (global_step, accuracy_score))
                 else:
                     print('No checkpoint file found')

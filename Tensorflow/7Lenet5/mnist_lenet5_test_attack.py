@@ -38,9 +38,15 @@ def test(mnist):
                         mnist_lenet5_forward.IMAGE_SIZE,
                         mnist_lenet5_forward.IMAGE_SIZE,
                         mnist_lenet5_forward.NUM_CHANNELS))
+                    for k in range(0,mnist.test.num_examples):
+                        reshaped_x[k][k%mnist_lenet5_forward.IMAGE_SIZE][k%mnist_lenet5_forward.IMAGE_SIZE][0] = 1
+                        # 改后 test accuracy = 0.979
+
+
                     accuracy_score = sess.run(accuracy, feed_dict={x: reshaped_x, y_: mnist.test.labels})
                     print(sess.run(tf.argmax(y, 1), feed_dict={x: reshaped_x, y_: mnist.test.labels}))
                     print("After %s training step(s), test accuracy = %g" % (global_step, accuracy_score))
+                    # 不循环，直接结束了，原test accuracy = 0.9784
                     return
                 else:
                     print('No checkpoint file found')
