@@ -54,5 +54,5 @@ def forward(x, train, regularizer):
 
     fc2_w = get_weight([FC_SIZE, OUTPUT_NODE], regularizer)
     fc2_b = get_bias([OUTPUT_NODE])
-    y = tf.matmul(fc1, fc2_w) + fc2_b
+    y = tf.nn.softmax(tf.matmul(fc1, fc2_w) + fc2_b)
     return y
