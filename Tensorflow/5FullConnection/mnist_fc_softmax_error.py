@@ -6,6 +6,8 @@ import mnist_forward
 import mnist_backward
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 TEST_INTERVAL_SECS = 5
 
 
@@ -31,7 +33,7 @@ def test(mnist):
 
         std = tf.constant([1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
-        y_err = tf.reduce_sum(tf.math.square(y_sort - std),1)
+        y_err = tf.reduce_sum(tf.math.square(y_sort - std), 1)
 
         y_err_right = tf.boolean_mask(y_err, correct_prediction)
         y_err_wrong = tf.boolean_mask(y_err, ~correct_prediction)
@@ -46,9 +48,10 @@ def test(mnist):
                     print(np.array(mnist.test.images).shape)
                     # \ #
 
-                    accuracy_score, vy_sort, vy_err,vy_err_right,vy_err_wrong, vcr = sess.run([accuracy, y_sort, y_err,y_err_right,y_err_wrong, correct_prediction],
-                                                                    feed_dict={x: mnist.test.images,
-                                                                               y_: mnist.test.labels})
+                    accuracy_score, vy_sort, vy_err, vy_err_right, vy_err_wrong, vcr = sess.run(
+                        [accuracy, y_sort, y_err, y_err_right, y_err_wrong, correct_prediction],
+                        feed_dict={x: mnist.test.images,
+                                   y_: mnist.test.labels})
                     print("After %s training step(s), test accuracy = %g" % (global_step, accuracy_score))
                     print(vcr.shape)
 
@@ -59,10 +62,24 @@ def test(mnist):
                     np.savetxt('vy_err_wrong.npy', vy_err_wrong)
 
                     print('error_right min %g max %g mean %g var %g ' %
-                          (np.min(vy_err_right), np.max(vy_err_right), np.mean(vy_err_right), np.square(np.var(vy_err_right))))
+                          (np.min(vy_err_right), np.max(vy_err_right), np.mean(vy_err_right),
+                           np.square(np.var(vy_err_right))))
                     print('error_wrong min %g max %g mean %g var %g ' %
                           (np.min(vy_err_wrong), np.max(vy_err_wrong), np.mean(vy_err_wrong),
                            np.square(np.var(vy_err_wrong))))
+
+                    bins = np.linspace(0, 0.8, 100)
+                    plt.figure()
+                    plt.hist(vy_err_right, bins)
+                    plt.figure()
+                    plt.hist(vy_err_wrong, bins, color='orange')
+
+                    bins1 = np.linspace(0, 0.04, 100)
+                    plt.figure()
+                    plt.hist(vy_err_right, bins1, color='green')
+                    plt.figure()
+                    plt.hist(vy_err_wrong, bins1, color='yellow')
+                    plt.show()
 
 
                 else:
