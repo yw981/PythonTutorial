@@ -8,6 +8,7 @@ from Nclasses import labels
 
 img_path = input('Input the path and image name:')
 img_ready = utils.load_image(img_path)
+print(img_ready.shape)
 
 fig = plt.figure("Top-5 预测结果")
 
