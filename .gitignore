@@ -9,6 +9,8 @@
 *.bmp
 *.gif
 *.pkl
+*.ckpt.*
+checkpoint
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
