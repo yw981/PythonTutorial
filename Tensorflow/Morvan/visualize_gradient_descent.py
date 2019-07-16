@@ -60,6 +60,7 @@ with tf.Session() as sess:
 # visualization codes:
 print('a=', a_, 'b=', b_)
 plt.figure(1)
+
 plt.scatter(x, y, c='b')    # plot data
 plt.plot(x, result, 'r-', lw=2)   # plot line fitting
 # 3D cost figure
