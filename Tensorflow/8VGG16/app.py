@@ -7,6 +7,7 @@ import utils
 from Nclasses import labels
 
 img_path = input('Input the path and image name:')
+# img_path = ['pic/0.jpg','pic/1.jpg']
 img_ready = utils.load_image(img_path)
 print(img_ready.shape)
 
