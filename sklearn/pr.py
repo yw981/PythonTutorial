@@ -26,6 +26,8 @@ classifier.fit(X_train, y_train)
 y_score = classifier.decision_function(X_test)
 
 average_precision = average_precision_score(y_test, y_score)
+print(y_test)
+print(y_score)
 
 print('Average precision-recall score: {0:0.2f}'.format(
     average_precision))
