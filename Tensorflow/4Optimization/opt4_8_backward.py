@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import opt4_8_generateds
 import opt4_8_forward
 
-STEPS = 40000
+STEPS = 10000
 BATCH_SIZE = 30
 LEARNING_RATE_BASE = 0.001
 LEARNING_RATE_DECAY = 0.999
