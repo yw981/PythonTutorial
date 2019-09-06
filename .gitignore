@@ -9,6 +9,7 @@
 *.bmp
 *.gif
 *.pkl
+*.pth
 *.ckpt.*
 checkpoint
 
