@@ -3,8 +3,10 @@ import numpy as np
 
 # restore variables
 # redefine the same shape and same type for your variables
-W = tf.Variable(np.arange(6).reshape((2, 3)), dtype=tf.float32, name="weights")
-b = tf.Variable(np.arange(3).reshape((1, 3)), dtype=tf.float32, name="biases")
+W = tf.Variable(np.arange(6).reshape((2, 3)), dtype=tf.float32)
+# W = tf.Variable(np.arange(6).reshape((2, 3)), dtype=tf.float32, name="weights")
+b = tf.Variable(np.arange(3).reshape((1, 3)), dtype=tf.float32)
+# b = tf.Variable(np.arange(3).reshape((1, 3)), dtype=tf.float32, name="biases")
 
 # not need init step
 
