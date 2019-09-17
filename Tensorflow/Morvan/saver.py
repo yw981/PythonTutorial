@@ -6,7 +6,10 @@ import tensorflow as tf
 # remember to define the same dtype and shape when restore
 
 W = tf.Variable([[1, 2, 3], [3, 4, 5]], dtype=tf.float32, name='weights')
-b = tf.Variable([[1, 2, 3]], dtype=tf.float32, name='biases')
+# W = tf.Variable([[1, 2, 3], [3, 4, 5]], dtype=tf.float32)
+b = tf.Variable([[6, 6, 6], [7, 7, 7]], dtype=tf.float32, name='biases')
+# b = tf.Variable([[1, 2, 3]], dtype=tf.float32)
+r = W + b
 
 # tf.initialize_all_variables() no long valid from
 # 2017-03-02 if using tensorflow >= 0.12
@@ -24,4 +27,3 @@ with tf.Session() as sess:
 
 
 ################################################
-
