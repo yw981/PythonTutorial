@@ -14,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Training dataset
 train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST(root='../data', train=True, download=True,
+    datasets.MNIST(root='../../data', train=True, download=True,
                    transform=transforms.Compose([
                        transforms.ToTensor(),
                        transforms.Normalize((0.1307,), (0.3081,))
@@ -23,12 +23,16 @@ train_loader = torch.utils.data.DataLoader(
 
 # Test dataset
 test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST(root='../data', train=False, transform=transforms.Compose([
+    datasets.MNIST(root='../../data', train=False, transform=transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])), batch_size=64, shuffle=True)
 
-#, num_workers=4
+
+# , num_workers=4
+
+def my_loss(x, y, z):
+    return F.nll_loss(x, y) - torch.sum(torch.pow(z, 2))
 
 
 class Net(nn.Module):
@@ -61,12 +65,16 @@ class Net(nn.Module):
         self.fc_loc[2].weight.data.zero_()
         self.fc_loc[2].bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
 
-    # Spatial transformer network forward function
-    def stn(self, x):
+    def get_theta(self, x):
         xs = self.localization(x)
         xs = xs.view(-1, 10 * 3 * 3)
         theta = self.fc_loc(xs)
         theta = theta.view(-1, 2, 3)
+        return theta
+
+    # Spatial transformer network forward function
+    def stn(self, x):
+        theta = self.get_theta(x)
 
         grid = F.affine_grid(theta, x.size())
         x = F.grid_sample(x, grid)
@@ -102,6 +110,8 @@ def train(epoch):
         optimizer.zero_grad()
         # output = model(data)
         output = model.forward(data)
+        # 自定义的loss
+        # loss = my_loss(output, target,output)
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
@@ -160,11 +170,13 @@ def visualize_stn():
         input_tensor = data.cpu()
         transformed_input_tensor = model.stn(data).cpu()
 
-        in_grid = convert_image_np(
-            torchvision.utils.make_grid(input_tensor))
+        # in_grid = convert_image_np(torchvision.utils.make_grid(input_tensor))
+        in_grid = torchvision.utils.make_grid(input_tensor)
 
-        out_grid = convert_image_np(
-            torchvision.utils.make_grid(transformed_input_tensor))
+        out_grid = convert_image_np(torchvision.utils.make_grid(transformed_input_tensor))
+
+        theta = model.get_theta(data)
+        print(theta.shape)
 
         # Plot the results side-by-side
         f, axarr = plt.subplots(1, 2)
@@ -175,7 +187,7 @@ def visualize_stn():
         axarr[1].set_title('Transformed Images')
 
 
-for epoch in range(1, 2 + 1):
+for epoch in range(1, 1 + 1):
     train(epoch)
     test()
 
