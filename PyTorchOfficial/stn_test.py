@@ -170,8 +170,8 @@ def visualize_stn():
         input_tensor = data.cpu()
         transformed_input_tensor = model.stn(data).cpu()
 
-        # in_grid = convert_image_np(torchvision.utils.make_grid(input_tensor))
-        in_grid = torchvision.utils.make_grid(input_tensor)
+        in_grid = convert_image_np(torchvision.utils.make_grid(input_tensor))
+        # in_grid = torchvision.utils.make_grid(input_tensor)
 
         out_grid = convert_image_np(torchvision.utils.make_grid(transformed_input_tensor))
 

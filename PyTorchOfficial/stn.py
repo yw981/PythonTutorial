@@ -14,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Training dataset
 train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST(root='../data', train=True, download=True,
+    datasets.MNIST(root='../../data', train=True, download=True,
                    transform=transforms.Compose([
                        transforms.ToTensor(),
                        transforms.Normalize((0.1307,), (0.3081,))
@@ -23,12 +23,13 @@ train_loader = torch.utils.data.DataLoader(
 
 # Test dataset
 test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST(root='../data', train=False, transform=transforms.Compose([
+    datasets.MNIST(root='../../data', train=False, transform=transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])), batch_size=64, shuffle=True)
 
-#, num_workers=4
+
+# , num_workers=4
 
 
 class Net(nn.Module):
@@ -160,11 +161,9 @@ def visualize_stn():
         input_tensor = data.cpu()
         transformed_input_tensor = model.stn(data).cpu()
 
-        in_grid = convert_image_np(
-            torchvision.utils.make_grid(input_tensor))
+        in_grid = convert_image_np(torchvision.utils.make_grid(input_tensor))
 
-        out_grid = convert_image_np(
-            torchvision.utils.make_grid(transformed_input_tensor))
+        out_grid = convert_image_np(torchvision.utils.make_grid(transformed_input_tensor))
 
         # Plot the results side-by-side
         f, axarr = plt.subplots(1, 2)
