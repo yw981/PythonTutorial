@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
+import numpy as np
 
 
 class Net(nn.Module):
@@ -14,8 +15,15 @@ class Net(nn.Module):
         self.conv2 = nn.Conv2d(20, 50, 5, 1)
         self.fc1 = nn.Linear(4 * 4 * 50, 500)
         self.fc2 = nn.Linear(500, 10)
+        self.apms = torch.nn.Parameter(torch.rand(size=(2, 3)))
 
     def forward(self, x):
+        # 有问题，还是得用Siamese？
+        if x.size()[0] != 64:
+            print(x.size())
+        grid = F.affine_grid(self.apms.repeat((x.size()[0], 1, 1)), x.size())
+        x = F.grid_sample(x, grid)
+
         x = F.relu(self.conv1(x))
         x = F.max_pool2d(x, 2, 2)
         x = F.relu(self.conv2(x))
@@ -31,6 +39,8 @@ def train(args, model, device, train_loader, optimizer, epoch):
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
+        # print(data.size())
+        # exit(1)
         output = model(data)
         loss = F.nll_loss(output, target)
         loss.backward()
@@ -109,6 +119,7 @@ def main():
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
+        print(model.apms)
         test(args, model, device, test_loader)
 
     if (args.save_model):
