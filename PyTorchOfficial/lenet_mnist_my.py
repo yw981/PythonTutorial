@@ -14,6 +14,10 @@ class Net(nn.Module):
         self.conv2 = nn.Conv2d(20, 50, 5, 1)
         self.fc1 = nn.Linear(4 * 4 * 50, 500)
         self.fc2 = nn.Linear(500, 10)
+        # self.tfparam = torch.array([[1.1, 0., 0.], [0., 1.1, 0.], [0., 0., 1.]])
+        # tfseed = (np.random.rand(3, 3) - 0.5) * np.array([[0.2, 0.2, 6], [0.2, 0.2, 6], [0, 0, 0]])
+        # print(tfseed)
+        # tfparam += tfseed
 
     def forward(self, x):
         x = F.relu(self.conv1(x))

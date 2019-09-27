@@ -32,7 +32,20 @@ test_loader = torch.utils.data.DataLoader(
 # , num_workers=4
 
 def my_loss(x, y, z):
-    return F.nll_loss(x, y) - torch.sum(torch.pow(z, 2))
+    # mu = torch.mean(z)
+    # std = torch.std(z)
+    # z = (z - mu) / std
+    # print(z)
+    minz = torch.min(z)
+    # print(minz)
+    maxz = torch.max(z)
+    # print(maxz)
+    z = (z - minz) / (maxz - minz)
+    # print(torch.sum(z))
+    # print(torch.norm(z, 2))
+
+    # 0.1-92% 0.02-94% 0.005-92%
+    return F.nll_loss(x, y) - 0.07 * torch.norm(z, 2)
 
 
 class Net(nn.Module):
@@ -110,9 +123,10 @@ def train(epoch):
         optimizer.zero_grad()
         # output = model(data)
         output = model.forward(data)
+        theta = model.get_theta(data)
         # 自定义的loss
-        # loss = my_loss(output, target,output)
-        loss = F.nll_loss(output, target)
+        loss = my_loss(output, target, theta)
+        # loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
         if batch_idx % 500 == 0:
