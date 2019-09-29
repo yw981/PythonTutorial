@@ -17,7 +17,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(500, 10)
         # for p in self.parameters():
         #     p.requires_grad = False
-        # self.apms = torch.nn.Parameter(torch.rand(size=(2, 3)))
+        self.apms = torch.nn.Parameter(torch.rand(size=(2, 3)))
 
     def forward(self, x):
         # 有问题，还是得用Siamese？
@@ -103,7 +103,7 @@ def main():
     #     train(model, device, train_loader, optimizer, epoch)
     #     print(model.apms)
     test(model, device, test_loader)
-    print(model.state_dict())
+    # print(model.state_dict())
 
     # torch.save(model.state_dict(), "../model/lenet_mnist_affine_model.pth")
 

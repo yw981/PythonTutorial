@@ -36,14 +36,14 @@ class Net(nn.Module):
         return F.log_softmax(x, dim=1)
 
 
-def my_loss(x, y, z):
+def my_loss(x, y, z, lm):
     diff = z - torch.FloatTensor([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
 
-    # 0.1-小 0.02-94% 1.0-过大 加个过大的惩罚项？
-    return F.nll_loss(x, y) - 0.2 * torch.norm(diff, 2)
+    # 0.1-小 0.2-94% 1.0-过大 加个过大的惩罚项？
+    return F.nll_loss(x, y) - lm * torch.norm(diff, 2)
 
 
-def train(model, device, train_loader, optimizer, epoch):
+def train(model, device, train_loader, optimizer, epoch, lm):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
@@ -52,7 +52,7 @@ def train(model, device, train_loader, optimizer, epoch):
         # exit(1)
         output = model(data)
         # loss = F.nll_loss(output, target)
-        loss = my_loss(output, target, model.apms)
+        loss = my_loss(output, target, model.apms, lm)
         loss.backward()
         optimizer.step()
         if batch_idx % 200 == 0:
@@ -108,13 +108,22 @@ def main():
     model.load_state_dict(torch.load('../model/lenet_mnist_model.pth'))
     optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
 
-    #
-    for epoch in range(1, epochs + 1):
-        train(model, device, train_loader, optimizer, epoch)
-        print(model.apms)
-        test(model, device, test_loader)
+    affine_params = []
+    for lm in [0.01, 0.3, 0.4]:
+        print(lm)
+        for epoch in range(1, epochs + 1):
+            train(model, device, train_loader, optimizer, epoch, lm)
+            print(model.apms)
+            test(model, device, test_loader)
+        affine_param = model.apms.cpu().numpy()
+        print(affine_param.shape)
+        affine_params.append(affine_param)
 
-    torch.save(model.state_dict(), "../model/lenet_mnist_affine_model.pth")
+    print(affine_params)
+    np.save('affine_params.npy', affine_params)
+
+
+    # torch.save(model.state_dict(), "../model/lenet_mnist_affine_model.pth")
 
 
 if __name__ == '__main__':
