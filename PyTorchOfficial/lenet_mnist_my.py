@@ -119,6 +119,7 @@ def main():
         # print(affine_param.shape)
         affine_params.append(affine_param)
 
+    affine_params = np.array(affine_params)
     print(affine_params.shape)
     print(affine_params)
     np.save('affine_params.npy', affine_params)
