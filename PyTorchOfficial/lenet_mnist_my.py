@@ -37,7 +37,8 @@ class Net(nn.Module):
 
 
 def my_loss(x, y, z, lm):
-    diff = z - torch.FloatTensor([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    diff = z - torch.FloatTensor([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]).to(device)
 
     # 0.1-小 0.2-94% 1.0-过大 加个过大的惩罚项？
     return F.nll_loss(x, y) - lm * torch.norm(diff, 2)
@@ -83,11 +84,10 @@ def test(model, device, test_loader):
 
 def main():
     batch_size = 64
-    use_cuda = torch.cuda.is_available()
     torch.manual_seed(1234)
     epochs = 2
-
-    device = torch.device("cuda" if use_cuda else "cpu")
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     train_loader = torch.utils.data.DataLoader(
