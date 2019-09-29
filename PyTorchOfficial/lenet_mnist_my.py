@@ -109,16 +109,17 @@ def main():
     optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
 
     affine_params = []
-    for lm in [0.01, 0.3, 0.4]:
+    for lm in [0.01,0.05,0.1,0.12,0.14,0.17,0.2,0.22, 0.3, 0.4]:
         print(lm)
         for epoch in range(1, epochs + 1):
             train(model, device, train_loader, optimizer, epoch, lm)
             print(model.apms)
             test(model, device, test_loader)
-        affine_param = model.apms.detach().numpy()
-        print(affine_param.shape)
+        affine_param = model.apms.cpu().detach().numpy()
+        # print(affine_param.shape)
         affine_params.append(affine_param)
 
+    print(affine_params.shape)
     print(affine_params)
     np.save('affine_params.npy', affine_params)
 
