@@ -115,7 +115,7 @@ def main():
             train(model, device, train_loader, optimizer, epoch, lm)
             print(model.apms)
             test(model, device, test_loader)
-        affine_param = model.apms.cpu().numpy()
+        affine_param = model.apms.detach().numpy()
         print(affine_param.shape)
         affine_params.append(affine_param)
 
