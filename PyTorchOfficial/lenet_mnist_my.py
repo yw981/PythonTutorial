@@ -15,13 +15,14 @@ class Net(nn.Module):
         self.conv2 = nn.Conv2d(20, 50, 5, 1)
         self.fc1 = nn.Linear(4 * 4 * 50, 500)
         self.fc2 = nn.Linear(500, 10)
+        for p in self.parameters():
+            p.requires_grad = False
         self.apms = torch.nn.Parameter(torch.rand(size=(2, 3)))
-
 
     def forward(self, x):
         # 有问题，还是得用Siamese？
-        if x.size()[0] != 64:
-            print(x.size())
+        # if x.size()[0] != 64:
+        #     print(x.size())
         grid = F.affine_grid(self.apms.repeat((x.size()[0], 1, 1)), x.size())
         x = F.grid_sample(x, grid)
 
@@ -35,7 +36,14 @@ class Net(nn.Module):
         return F.log_softmax(x, dim=1)
 
 
-def train(args, model, device, train_loader, optimizer, epoch):
+def my_loss(x, y, z):
+    diff = z - torch.FloatTensor([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+
+    # 0.1-小 0.02-94% 1.0-过大 加个过大的惩罚项？
+    return F.nll_loss(x, y) - 0.2 * torch.norm(diff, 2)
+
+
+def train(model, device, train_loader, optimizer, epoch):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
@@ -43,16 +51,18 @@ def train(args, model, device, train_loader, optimizer, epoch):
         # print(data.size())
         # exit(1)
         output = model(data)
-        loss = F.nll_loss(output, target)
+        # loss = F.nll_loss(output, target)
+        loss = my_loss(output, target, model.apms)
         loss.backward()
         optimizer.step()
-        if batch_idx % args.log_interval == 0:
+        if batch_idx % 200 == 0:
+            print(model.apms)
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), loss.item()))
 
 
-def test(args, model, device, test_loader):
+def test(model, device, test_loader):
     model.eval()
     test_loss = 0
     correct = 0
@@ -72,31 +82,10 @@ def test(args, model, device, test_loader):
 
 
 def main():
-    # Training settings
-    parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
-                        help='input batch size for training (default: 64)')
-    parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
-                        help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=2, metavar='N',
-                        help='number of epochs to train (default: 10)')
-    parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
-                        help='learning rate (default: 0.01)')
-    parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
-                        help='SGD momentum (default: 0.5)')
-    parser.add_argument('--no-cuda', action='store_true', default=False,
-                        help='disables CUDA training')
-    parser.add_argument('--seed', type=int, default=1, metavar='S',
-                        help='random seed (default: 1)')
-    parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                        help='how many batches to wait before logging training status')
-
-    parser.add_argument('--save-model', action='store_true', default=True,
-                        help='For Saving the current Model')
-    args = parser.parse_args()
-    use_cuda = not args.no_cuda and torch.cuda.is_available()
-
-    torch.manual_seed(args.seed)
+    batch_size = 64
+    use_cuda = torch.cuda.is_available()
+    torch.manual_seed(1234)
+    epochs = 2
 
     device = torch.device("cuda" if use_cuda else "cpu")
 
@@ -107,24 +96,25 @@ def main():
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])),
-        batch_size=args.batch_size, shuffle=True, **kwargs)
+        batch_size=batch_size, shuffle=True, **kwargs)
     test_loader = torch.utils.data.DataLoader(
         datasets.MNIST('../../data', train=False, transform=transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,))
         ])),
-        batch_size=args.test_batch_size, shuffle=True, **kwargs)
+        batch_size=10000, shuffle=True, **kwargs)
 
     model = Net().to(device)
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+    model.load_state_dict(torch.load('../model/lenet_mnist_model.pth'))
+    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
 
-    for epoch in range(1, args.epochs + 1):
-        train(args, model, device, train_loader, optimizer, epoch)
+    #
+    for epoch in range(1, epochs + 1):
+        train(model, device, train_loader, optimizer, epoch)
         print(model.apms)
-        test(args, model, device, test_loader)
+        test(model, device, test_loader)
 
-    if (args.save_model):
-        torch.save(model.state_dict(), "../../model/lenet_mnist_model.pth")
+    torch.save(model.state_dict(), "../model/lenet_mnist_affine_model.pth")
 
 
 if __name__ == '__main__':
