@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 epsilons = [0, .05, .1, .15, .2, .25, .3]
-pretrained_model = "../data/lenet_mnist_model.pth"
+pretrained_model = "../../data/lenet_mnist_model.pth"
 use_cuda = True
 
 
@@ -49,7 +49,7 @@ class Net(nn.Module):
 
 # MNIST Test dataset and dataloader declaration
 test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../data', train=False, download=True, transform=transforms.Compose([
+    datasets.MNIST('../../data', train=False, download=True, transform=transforms.Compose([
         transforms.ToTensor(),
     ])),
     batch_size=1, shuffle=True)
