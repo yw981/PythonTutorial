@@ -77,11 +77,13 @@ preprocess = transforms.Compose([
     normalize
 ])
 # 通过requests库获取图片并保存，若是本地图片则只需要设置本地图片的保存地址，以便后来提取便好
-# img_path = "/../..jpg"
-# img_pil = Image.open(img_path)
-response = requests.get(IMG_URL)
-img_pil = Image.open(io.BytesIO(response.content))
-img_pil.save('test.jpg')
+img_path = "a.jpg"
+# img_path = "b38m.jpg"
+# img_path = "c.jpg"
+img_pil = Image.open(img_path)
+# response = requests.get(IMG_URL)
+# img_pil = Image.open(io.BytesIO(response.content))
+# img_pil.save('test.jpg')
 # 将图片数据处理成所需要的可用的数据
 img_tensor = preprocess(img_pil)
 # 处理图片为Variable数据
@@ -112,9 +114,9 @@ CAMs = returnCAM(features_blobs[0], weight_softmax, [idx[0]])
 # render the CAM and output
 print('output CAM.jpg for the top1 prediction: %s' % classes[idx[0]])
 # 将图片和CAM拼接在一起展示定位结果结果
-img = cv2.imread('test.jpg')
+img = cv2.imread(img_path)
 height, width, _ = img.shape
 # 生成热度图
 heatmap = cv2.applyColorMap(cv2.resize(CAMs[0], (width, height)), cv2.COLORMAP_JET)
 result = heatmap * 0.3 + img * 0.5
-cv2.imwrite('CAM.jpg', result)
+cv2.imwrite(img_path+'CAM.jpg', result)
