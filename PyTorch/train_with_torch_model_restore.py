@@ -7,14 +7,8 @@ transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-trainset = torchvision.datasets.CIFAR10(root='../../data', train=True,
-                                        download=False, transform=transform)
-
 testset = torchvision.datasets.CIFAR10(root='../../data', train=False,
                                        download=False, transform=transform)
-
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=100,
-                                          shuffle=True, num_workers=2)
 
 testloader = torch.utils.data.DataLoader(testset, batch_size=100,
                                          shuffle=False, num_workers=2)
@@ -22,42 +16,11 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=100,
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
-import torch.nn as nn
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 net = torchvision.models.densenet161()
 
-import torch.optim as optim
-
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(net.parameters(), lr=0.001)
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-net.to(device)
-
-for epoch in range(5):
-
-    running_loss = 0.
-    batch_size = 100
-
-    for i, data in enumerate(
-            torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                        shuffle=True, num_workers=2), 0):
-        inputs, labels = data
-        inputs, labels = inputs.to(device), labels.to(device)
-
-        optimizer.zero_grad()
-
-        outputs = net(inputs)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-
-        print('[%d, %5d] loss: %.4f' % (epoch + 1, (i + 1) * batch_size, loss.item()))
-
-print('Finished Training')
-
-torch.save(net, 'cifar10.pkl')
-# net = torch.load('cifar10.pkl')
+net = torch.load('cifar10.pkl')
 
 correct = 0
 total = 0
