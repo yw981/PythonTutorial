@@ -14,7 +14,7 @@ class Net(nn.Module):
         self.conv2 = nn.Conv2d(20, 50, 5, 1)
         self.fc1 = nn.Linear(4 * 4 * 50, 500)
         self.fc2 = nn.Linear(500, 10)
-        self.apms = torch.nn.Parameter(torch.rand(size=(2, 3)))
+        # self.apms = torch.nn.Parameter(torch.rand(size=(2, 3)))
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -112,8 +112,8 @@ def main():
         train(args, model, device, train_loader, optimizer, epoch)
         test(args, model, device, test_loader)
 
-    if (args.save_model):
-        torch.save(model.state_dict(), "../model/lenet_mnist_model.pth")
+    if args.save_model:
+        torch.save(model.state_dict(), "../../model/lenet_mnist_model.pth")
 
 
 if __name__ == '__main__':

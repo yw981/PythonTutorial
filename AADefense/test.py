@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from lenet import Lenet
+from lenet import Net
 from torchvision import datasets, transforms
 
 
