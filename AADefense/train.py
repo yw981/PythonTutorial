@@ -4,7 +4,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 # from lenet import Net
-from stn_lenet import Net
+# from stn_lenet import Net
+from torchvision.models.densenet import DenseNet as Net
 from test import test
 
 
@@ -14,7 +15,8 @@ def train(args, model, device, train_loader, optimizer, epoch):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = F.nll_loss(output, target)
+        # loss = F.nll_loss(output, target)
+        loss = torch.nn.CrossEntropyLoss(output, target)
         loss.backward()
         optimizer.step()
         if batch_idx % args.log_interval == 0:
@@ -45,7 +47,7 @@ def main():
 
     parser.add_argument('--save-model', action='store_true', default=True,
                         help='For Saving the current Model')
-    parser.add_argument('--save-path', type=str, default="../../model/stnlenet_c10_model.pth",
+    parser.add_argument('--save-path', type=str, default="../../model/densenet_c10_model.pth",
                         help='Path and filename to save the trained model')
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
@@ -56,32 +58,32 @@ def main():
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     # mnist 数据
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])
-    train_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../../data', train=True, download=True,
-                       transform=transform),
-        batch_size=args.batch_size, shuffle=True, **kwargs)
-    test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../../data', train=False, transform=transform),
-        batch_size=args.test_batch_size, shuffle=True, **kwargs)
-
-    # cifar10 数据
     # transform = transforms.Compose([
     #     transforms.ToTensor(),
-    #     transforms.Normalize((125.3 / 255, 123.0 / 255, 113.9 / 255), (63.0 / 255, 62.1 / 255.0, 66.7 / 255.0)),
+    #     transforms.Normalize((0.1307,), (0.3081,))
     # ])
     # train_loader = torch.utils.data.DataLoader(
-    #     datasets.CIFAR10(root='../../data', train=True, download=True,
-    #                      transform=transform),
-    #     batch_size=args.batch_size, shuffle=False
-    # )
+    #     datasets.MNIST('../../data', train=True, download=True,
+    #                    transform=transform),
+    #     batch_size=args.batch_size, shuffle=True, **kwargs)
     # test_loader = torch.utils.data.DataLoader(
-    #     datasets.CIFAR10(root='../../data', train=False, download=True, transform=transform),
-    #     batch_size=args.batch_size, shuffle=False
-    # )
+    #     datasets.MNIST('../../data', train=False, transform=transform),
+    #     batch_size=args.test_batch_size, shuffle=True, **kwargs)
+
+    # cifar10 数据
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((125.3 / 255, 123.0 / 255, 113.9 / 255), (63.0 / 255, 62.1 / 255.0, 66.7 / 255.0)),
+    ])
+    train_loader = torch.utils.data.DataLoader(
+        datasets.CIFAR10(root='../../data', train=True, download=True,
+                         transform=transform),
+        batch_size=args.batch_size, shuffle=False
+    )
+    test_loader = torch.utils.data.DataLoader(
+        datasets.CIFAR10(root='../../data', train=False, download=True, transform=transform),
+        batch_size=args.batch_size, shuffle=False
+    )
 
     model = Net(3).to(device)
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
