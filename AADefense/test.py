@@ -6,10 +6,11 @@ from torchvision.models.densenet import DenseNet as Net
 
 
 def restore_model():
-    # model = Net()
+    # 注意参数和cuda()
+    model = Net(3).cuda()
     address = '../../model/densenet_c10_model.pth'
-    model = torch.load(address)
-    # model.load_state_dict(torch.load(address))
+    # model = torch.load(address)
+    model.load_state_dict(torch.load(address))
     # model.eval()
     return model
 
@@ -41,20 +42,23 @@ if __name__ == '__main__':
     batch_size = 64
     model = restore_model()
 
-    # train_loader = torch.utils.data.DataLoader(
-    #     datasets.MNIST('../../data', train=True, download=True,
-    #                    transform=transforms.Compose([
-    #                        transforms.ToTensor(),
-    #                        transforms.Normalize((0.1307,), (0.3081,))
-    #                    ])),
+    # MNIST 数据
+    # test_loader = torch.utils.data.DataLoader(
+    #     datasets.MNIST('../../data', train=False, transform=transforms.Compose([
+    #         transforms.ToTensor(),
+    #         transforms.Normalize((0.1307,), (0.3081,))
+    #     ])),
     #     batch_size=batch_size, shuffle=True, **kwargs)
 
+    # cifar10 数据
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((125.3 / 255, 123.0 / 255, 113.9 / 255), (63.0 / 255, 62.1 / 255.0, 66.7 / 255.0)),
+    ])
     test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../../data', train=False, transform=transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])),
-        batch_size=batch_size, shuffle=True, **kwargs)
+        datasets.CIFAR10(root='../../data', train=False, download=True, transform=transform),
+        batch_size=batch_size, shuffle=False
+    )
 
     # test(model, device, train_loader,'Train')
     test(model, device, test_loader)
