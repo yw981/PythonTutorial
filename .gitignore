@@ -10,6 +10,7 @@
 *.gif
 *.pkl
 *.pth
+*.pth.*
 *.ckpt.*
 checkpoint
 

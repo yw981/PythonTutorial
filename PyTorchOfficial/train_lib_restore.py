@@ -2,15 +2,24 @@ import torch
 import torch.nn.functional as F
 # from lenet import Net
 from torchvision import datasets, transforms
-from torchvision.models.densenet import DenseNet as Net
+# from torchvision.models.densenet import DenseNet as Net
+import torchvision
 
 
 def restore_model():
     # model = Net()
-    address = '../../model/densenet_c10_model.pth'
-    model = torch.load(address)
-    # model.load_state_dict(torch.load(address))
+    model = torchvision.models.resnet18()
+
+    # 没使用GPU训练模型参数保存conv1.weight 使用了GPU训练模型参数会被保存成module.conv1.weight
+    model = torch.nn.DataParallel(model)
+
+    address = './model_best.pth.tar'
+    model_dict = torch.load(address)
+    # print(model_dict)
+    # model.load_state_dict(model_dict)
+    model.load_state_dict(model_dict['state_dict'])
     # model.eval()
+
     return model
 
 
@@ -41,20 +50,23 @@ if __name__ == '__main__':
     batch_size = 64
     model = restore_model()
 
-    # train_loader = torch.utils.data.DataLoader(
-    #     datasets.MNIST('../../data', train=True, download=True,
-    #                    transform=transforms.Compose([
-    #                        transforms.ToTensor(),
-    #                        transforms.Normalize((0.1307,), (0.3081,))
-    #                    ])),
+    # MNIST
+    # test_loader = torch.utils.data.DataLoader(
+    #     datasets.MNIST('../../data', train=False, transform=transforms.Compose([
+    #         transforms.ToTensor(),
+    #         transforms.Normalize((0.1307,), (0.3081,))
+    #     ])),
     #     batch_size=batch_size, shuffle=True, **kwargs)
 
+    # cifar10 数据
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((125.3 / 255, 123.0 / 255, 113.9 / 255), (63.0 / 255, 62.1 / 255.0, 66.7 / 255.0)),
+    ])
     test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../../data', train=False, transform=transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])),
-        batch_size=batch_size, shuffle=True, **kwargs)
+        datasets.CIFAR10(root='../../data', train=False, download=True, transform=transform),
+        batch_size=batch_size, shuffle=False
+    )
 
     # test(model, device, train_loader,'Train')
     test(model, device, test_loader)

@@ -16,7 +16,11 @@ def train(args, model, device, train_loader, optimizer, epoch):
         optimizer.zero_grad()
         output = model(data)
         # loss = F.nll_loss(output, target)
-        loss = torch.nn.CrossEntropyLoss(output, target)
+        # print('op ',output.size(),output.dtype)
+        # print('tar ',target.size(),target.dtype)
+
+        # loss = torch.nn.CrossEntropyLoss(output, target)
+        loss = F.cross_entropy(output, target)
         loss.backward()
         optimizer.step()
         if batch_idx % args.log_interval == 0:
@@ -32,7 +36,7 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=10, metavar='N',
+    parser.add_argument('--epochs', type=int, default=1, metavar='N',
                         help='number of epochs to train (default: 10)')
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                         help='learning rate (default: 0.01)')
@@ -94,6 +98,7 @@ def main():
 
     if args.save_model:
         torch.save(model.state_dict(), args.save_path)
+        print('model saved to ', args.save_path)
 
 
 if __name__ == '__main__':
