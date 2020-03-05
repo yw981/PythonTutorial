@@ -63,7 +63,7 @@ def main():
 
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+    kwargs = {'num_workers': 2, 'pin_memory': True} if use_cuda else {}
     # mnist 数据
     # transform = transforms.Compose([
     #     transforms.ToTensor(),
@@ -99,7 +99,7 @@ def main():
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, criterion, device, train_loader, optimizer, epoch)
-        test(model, device, test_loader)
+        test(model, criterion, device, test_loader)
 
     if args.save_model:
         torch.save(model.state_dict(), args.save_path)
