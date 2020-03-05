@@ -9,18 +9,21 @@ from torchvision.models.densenet import DenseNet as Net
 from test import test
 
 
-def train(args, model, device, train_loader, optimizer, epoch):
+def train(args, model, criterion, device, train_loader, optimizer, epoch):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
         # loss = F.nll_loss(output, target)
-        # print('op ',output.size(),output.dtype)
-        # print('tar ',target.size(),target.dtype)
+        # loss = F.cross_entropy(output, target)
 
-        # loss = torch.nn.CrossEntropyLoss(output, target)
-        loss = F.cross_entropy(output, target)
+        # output数据类型tensor float32、维度[batch_size,模型输出维度]此处[64,1000]
+        # target均是tensor int64、维度[batch_size]此处[64]
+        # torch.nn.CrossEntropyLoss()返回值是function，直接调用torch.nn.CrossEntropyLoss(output, target)是错误的！
+        # loss的criterion定义已经提到外部
+        loss = criterion(output, target)
+
         loss.backward()
         optimizer.step()
         if batch_idx % args.log_interval == 0:
@@ -89,11 +92,13 @@ def main():
         batch_size=args.batch_size, shuffle=False
     )
 
-    model = Net(3).to(device)
+    # 各模型新建时，注意参数
+    model = Net(3, num_classes=10).to(device)
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+    criterion = torch.nn.CrossEntropyLoss()
 
     for epoch in range(1, args.epochs + 1):
-        train(args, model, device, train_loader, optimizer, epoch)
+        train(args, model, criterion, device, train_loader, optimizer, epoch)
         test(model, device, test_loader)
 
     if args.save_model:
