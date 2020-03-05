@@ -4,8 +4,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 # from lenet import Net
-# from stn_lenet import Net
-from torchvision.models.densenet import DenseNet as Net
+from stn_lenet import Net
+# from torchvision.models.densenet import DenseNet as Net
 from test import test
 
 
@@ -57,6 +57,8 @@ def main():
                         help='For Saving the current Model')
     parser.add_argument('--save-path', type=str, default="../../model/densenet_c10_model.pth",
                         help='Path and filename to save the trained model')
+
+    parser.add_argument('--num-workers', type=int, default=0, help='number of workers (default: 0)')
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -64,37 +66,37 @@ def main():
 
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    kwargs = {'num_workers': 2, 'pin_memory': True} if use_cuda else {}
+    kwargs = {'num_workers': args.num_workers, 'pin_memory': True} if use_cuda else {}
     # mnist 数据
-    # transform = transforms.Compose([
-    #     transforms.ToTensor(),
-    #     transforms.Normalize((0.1307,), (0.3081,))
-    # ])
-    # train_loader = torch.utils.data.DataLoader(
-    #     datasets.MNIST('../../data', train=True, download=True,
-    #                    transform=transform),
-    #     batch_size=args.batch_size, shuffle=True, **kwargs)
-    # test_loader = torch.utils.data.DataLoader(
-    #     datasets.MNIST('../../data', train=False, transform=transform),
-    #     batch_size=args.test_batch_size, shuffle=True, **kwargs)
-
-    # cifar10 数据
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((125.3 / 255, 123.0 / 255, 113.9 / 255), (63.0 / 255, 62.1 / 255.0, 66.7 / 255.0)),
+        transforms.Normalize((0.1307,), (0.3081,))
     ])
     train_loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10(root='../../data', train=True, download=True,
-                         transform=transform),
-        batch_size=args.batch_size, shuffle=False
-    )
+        datasets.MNIST('../../data', train=True, download=True,
+                       transform=transform),
+        batch_size=args.batch_size, shuffle=True, **kwargs)
     test_loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10(root='../../data', train=False, download=True, transform=transform),
-        batch_size=args.batch_size, shuffle=False
-    )
+        datasets.MNIST('../../data', train=False, transform=transform),
+        batch_size=args.test_batch_size, shuffle=True, **kwargs)
+
+    # cifar10 数据
+    # transform = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     transforms.Normalize((125.3 / 255, 123.0 / 255, 113.9 / 255), (63.0 / 255, 62.1 / 255.0, 66.7 / 255.0)),
+    # ])
+    # train_loader = torch.utils.data.DataLoader(
+    #     datasets.CIFAR10(root='../../data', train=True, download=True,
+    #                      transform=transform),
+    #     batch_size=args.batch_size, shuffle=False
+    # )
+    # test_loader = torch.utils.data.DataLoader(
+    #     datasets.CIFAR10(root='../../data', train=False, download=True, transform=transform),
+    #     batch_size=args.batch_size, shuffle=False
+    # )
 
     # 各模型新建时，注意参数
-    model = Net(3, num_classes=10).to(device)
+    model = Net(1).to(device)
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     criterion = torch.nn.CrossEntropyLoss()
 
@@ -109,3 +111,11 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+    # Stn_lenet
+    # --lr 0.01 --epochs 5 --batch-size 116 --log-interval 120 --save-path ../../model/stn_lenet_mnist.pth
+    # --lr 0.01 --epochs 5 --batch-size 116 --num-workers 2 --log-interval 120 --save-path ../../model/stn_lenet_mnist.pth
+
+    # Lenet
+    # --lr 0.01 --epochs 5 --batch-size 116 --log-interval 120 --save-path ../../model/lenet_mnist.pth
+    # --lr 0.01 --epochs 5 --batch-size 116 --num-workers 2 --log-interval 120 --save-path ../../model/lenet_mnist.pth
