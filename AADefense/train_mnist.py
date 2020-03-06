@@ -3,8 +3,8 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
-# from lenet import Net
-from stn_lenet import Net
+from lenet import Net
+# from stn_lenet import Net
 # from torchvision.models.densenet import DenseNet as Net
 from test import test
 
