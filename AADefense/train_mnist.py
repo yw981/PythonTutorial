@@ -3,8 +3,8 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
-# from lenet import Net
-from stn_lenet import Net
+from lenet import Net
+# from stn_lenet import Net
 # from torchvision.models.densenet import DenseNet as Net
 from test import test
 
@@ -40,12 +40,11 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=10, metavar='N',
+    parser.add_argument('--epochs', type=int, default=2, metavar='N',
                         help='number of epochs to train (default: 10)')
-    parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
+    parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                         help='learning rate (default: 0.01)')
-    # 加momentum导致STN在MNIST上失效？
-    parser.add_argument('--momentum', type=float, default=0, metavar='M',
+    parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                         help='SGD momentum (default: 0.5)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
@@ -56,8 +55,10 @@ def main():
 
     parser.add_argument('--save-model', action='store_true', default=True,
                         help='For Saving the current Model')
-    parser.add_argument('--save-path', type=str, default="../../model/stn_mnist_model.pth",
+    parser.add_argument('--save-path', type=str, default="../../model/densenet_c10_model.pth",
                         help='Path and filename to save the trained model')
+
+    parser.add_argument('--num-workers', type=int, default=0, help='number of workers (default: 0)')
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -65,7 +66,7 @@ def main():
 
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    kwargs = {'num_workers': 2, 'pin_memory': True} if use_cuda else {}
+    kwargs = {'num_workers': args.num_workers, 'pin_memory': True} if use_cuda else {}
     # mnist 数据
     transform = transforms.Compose([
         transforms.ToTensor(),
@@ -94,9 +95,8 @@ def main():
     #     batch_size=args.batch_size, shuffle=False
     # )
 
+    # 各模型新建时，注意参数
     model = Net(1).to(device)
-    # optimizer = optim.Adam(model.parameters(), lr=args.lr)
-
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     criterion = torch.nn.CrossEntropyLoss()
 
@@ -111,3 +111,11 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+    # Stn_lenet
+    # --lr 0.01 --epochs 5 --batch-size 116 --log-interval 120 --save-path ../../model/stn_lenet_mnist.pth
+    # --lr 0.01 --epochs 5 --batch-size 116 --num-workers 2 --log-interval 120 --save-path ../../model/stn_lenet_mnist.pth
+
+    # Lenet
+    # --lr 0.01 --epochs 5 --batch-size 116 --log-interval 120 --save-path ../../model/lenet_mnist.pth
+    # --lr 0.01 --epochs 5 --batch-size 116 --num-workers 2 --log-interval 120 --save-path ../../model/lenet_mnist.pth
