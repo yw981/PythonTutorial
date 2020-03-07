@@ -55,7 +55,7 @@ def main():
 
     parser.add_argument('--save-model', action='store_true', default=True,
                         help='For Saving the current Model')
-    parser.add_argument('--save-path', type=str, default="../../model/densenet_c10_model.pth",
+    parser.add_argument('--save-path', type=str, default="../../model/default_model.pth",
                         help='Path and filename to save the trained model')
 
     parser.add_argument('--num-workers', type=int, default=0, help='number of workers (default: 0)')
@@ -70,7 +70,8 @@ def main():
     # mnist 数据
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
+        # MNIST数据集数据范围0-1之间，平均值0.1307，标准差0.3801，因此经过归一化可变成标准正态分布
+        # transforms.Normalize((0.1307,), (0.3081,))
     ])
     train_loader = torch.utils.data.DataLoader(
         datasets.MNIST('../../data', train=True, download=True,
