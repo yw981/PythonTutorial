@@ -8,6 +8,8 @@ from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
 import numpy as np
 
+from torch.autograd import Variable
+
 plt.ion()  # interactive mode
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -40,12 +42,24 @@ def my_loss(x, y, z):
     # print(minz)
     maxz = torch.max(z)
     # print(maxz)
-    z = (z - minz) / (maxz - minz)
+    # z = (z - minz) / (maxz - minz)
+
+
     # print(torch.sum(z))
     # print(torch.norm(z, 2))
 
+    ori = torch.Tensor([[1.0, 0, 0], [0, 1.0, 0]]).cuda()
+    z = z - ori
+
+    # print(ori.size())
+    # print(ori)
+    # print(z)
+    # nm = torch.pow(z - minz, 2)
+    # print(nm)
+    nm = torch.norm(z, 2)
+
     # 0.1-92% 0.02-94% 0.005-92%
-    return F.nll_loss(x, y) - 0.07 * torch.norm(z, 2)
+    return F.nll_loss(x, y) + 0.0001 * torch.exp(nm)
 
 
 class Net(nn.Module):
@@ -124,12 +138,13 @@ def train(epoch):
         # output = model(data)
         output = model.forward(data)
         theta = model.get_theta(data)
+        # print(theta.size()) # torch.Size([64, 2, 3])
         # 自定义的loss
         loss = my_loss(output, target, theta)
         # loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-        if batch_idx % 500 == 0:
+        if batch_idx % 200 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), loss.item()))
@@ -185,13 +200,14 @@ def visualize_stn():
 
         input_tensor = data.cpu()
         transformed_input_tensor = model.stn(data).cpu()
+        theta = model.get_theta(data)
+        # print(theta)
 
         in_grid = convert_image_np(torchvision.utils.make_grid(input_tensor))
         # in_grid = torchvision.utils.make_grid(input_tensor)
 
         out_grid = convert_image_np(torchvision.utils.make_grid(transformed_input_tensor))
 
-        theta = model.get_theta(data)
         print(theta.shape)
 
         # Plot the results side-by-side
@@ -203,7 +219,7 @@ def visualize_stn():
         axarr[1].set_title('Transformed Images')
 
 
-for epoch in range(1, 1 + 1):
+for epoch in range(1, 5 + 1):
     train(epoch)
     test()
 

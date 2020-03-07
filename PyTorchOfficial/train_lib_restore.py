@@ -8,7 +8,8 @@ import torchvision
 
 def restore_model():
     # model = Net()
-    model = torchvision.models.resnet18()
+    # model = torchvision.models.resnet18()
+    model = torchvision.models.densenet161()
 
     # 没使用GPU训练模型参数保存conv1.weight 使用了GPU训练模型参数会被保存成module.conv1.weight
     model = torch.nn.DataParallel(model)
