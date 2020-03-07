@@ -6,7 +6,7 @@ import torchvision
 from torchvision import transforms, datasets
 from lenet import Net
 
-import matplotlib.pyplot as plt
+
 
 # 可编辑部分 模型、数据集、攻击方法
 # 实验1： 自训练的LeNet模型，数据未归一化，MNIST全数据集
