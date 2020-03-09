@@ -6,20 +6,23 @@ import torchvision
 from torchvision import transforms, datasets
 from lenet import Net
 
-
-
 # 可编辑部分 模型、数据集、攻击方法
 # 实验1： 自训练的LeNet模型，数据未归一化，MNIST全数据集
 model = Net(1).cuda()
 address = '../../model/lenet_mnist.pth'
 model.load_state_dict(torch.load(address))
 model = model.eval()
-save_file_path = 'result/aa_lenet_mnist_fsgm.npy'
+save_file_path_prefix = 'result/aa_lenet_mnist_cw'
 
 # preprocessing = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], axis=-3)
 fmodel = foolbox.models.PyTorchModel(model, bounds=(0, 1), num_classes=10
                                      # , preprocessing=preprocessing
                                      )
+# attack = foolbox.attacks.FGSM(fmodel)
+attack = foolbox.attacks.CarliniWagnerL2Attack(model=fmodel,
+                                               # criterion=foolbox.criteria.TargetClassProbability(target_id, p=.2)
+                                               )
+
 transform = transforms.Compose([
     transforms.ToTensor(),
     # transforms.Normalize((0.1307,), (0.3081,))
@@ -35,8 +38,8 @@ test_loader = torch.utils.data.DataLoader(
                    transform=transform
                    # transform=torchvision.transforms.ToTensor()
                    ),
-    batch_size=200, shuffle=True)
-attack = foolbox.attacks.FGSM(fmodel)
+    batch_size=200, shuffle=False)
+
 
 # get a batch of images and labels and print the accuracy
 # images, labels = foolbox.utils.samples(dataset='imagenet', batchsize=16, data_format='channels_first', bounds=(0, 1))
@@ -71,13 +74,16 @@ attack = foolbox.attacks.FGSM(fmodel)
 
 
 results = []
+labels = []
+count_origin_right = 0
 count_aa_failed = 0
 
 for batch_idx, (data, target) in enumerate(test_loader):
     np_data = data.numpy()
     np_target = target.numpy()
-
-    print('origin acc = ', np.mean(fmodel.forward(np_data).argmax(axis=-1) == np_target))
+    origin_result = fmodel.forward(np_data).argmax(axis=-1) == np_target
+    count_origin_right += np.count_nonzero(origin_result)
+    print('origin acc = ', np.mean(origin_result), ' total right ', count_origin_right)
 
     # unpack=True只返回numpy array的攻击结果图片，unpack=False否则返回对象，包括标签等所有信息
     adversarials = attack(np_data, np_target, unpack=True)
@@ -87,9 +93,10 @@ for batch_idx, (data, target) in enumerate(test_loader):
     test_result = fmodel.forward(adversarials).argmax(axis=-1) == np_target
     count_aa_failed += np.count_nonzero(test_result)
 
-    # results = np.vstack((results, adversarials))
-    # print(results.shape)
     results.append(adversarials)
+    # print(target.shape) # torch.Size([200])
+    # TODO 考虑Tensor的合并
+    labels.append(target.numpy())
     print('finish ', batch_idx, ' rate = ', np.mean(test_result), ' total failed ', count_aa_failed)
     # if batch_idx == 2:
     #     break
@@ -117,9 +124,9 @@ results = np.array(results)
 # print(results.shape)
 results = results.reshape(-1, 1, 28, 28)
 # print(results.shape)
-np.save(save_file_path, results)
-# exit(0)
 
-# -> 0.9375
-
-# apply the attack
+labels = np.array(labels)
+labels = labels.flatten()
+# print(labels.shape)
+np.save(save_file_path_prefix+'.npy', results)
+np.save(save_file_path_prefix+'_label.npy', labels)
