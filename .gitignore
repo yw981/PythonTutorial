@@ -1,6 +1,7 @@
 .idea/
 **/model
 **/data
+**/result
 *.npy
 **/pic
 *.jpg

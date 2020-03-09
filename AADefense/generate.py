@@ -11,10 +11,10 @@ from lenet import Net
 # 可编辑部分 模型、数据集、攻击方法
 # 实验1： 自训练的LeNet模型，数据未归一化，MNIST全数据集
 model = Net(1).cuda()
-address = '../../model/default_model.pth'
+address = '../../model/lenet_mnist.pth'
 model.load_state_dict(torch.load(address))
 model = model.eval()
-save_file_path = 'aa_lenet_mnist_fsgm.npy'
+save_file_path = 'result/aa_lenet_mnist_fsgm.npy'
 
 # preprocessing = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], axis=-3)
 fmodel = foolbox.models.PyTorchModel(model, bounds=(0, 1), num_classes=10
@@ -24,12 +24,12 @@ transform = transforms.Compose([
     transforms.ToTensor(),
     # transforms.Normalize((0.1307,), (0.3081,))
 ])
-train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('../../data', train=True, download=True,
-                   transform=transform
-                   # transform=torchvision.transforms.ToTensor()
-                   ),
-    batch_size=128, shuffle=True)
+# train_loader = torch.utils.data.DataLoader(
+#     datasets.MNIST('../../data', train=True, download=True,
+#                    transform=transform
+#                    # transform=torchvision.transforms.ToTensor()
+#                    ),
+#     batch_size=128, shuffle=True)
 test_loader = torch.utils.data.DataLoader(
     datasets.MNIST('../../data', train=False,
                    transform=transform
@@ -81,6 +81,7 @@ for batch_idx, (data, target) in enumerate(test_loader):
 
     # unpack=True只返回numpy array的攻击结果图片，unpack=False否则返回对象，包括标签等所有信息
     adversarials = attack(np_data, np_target, unpack=True)
+    # TODO 考虑只攻击分类对的图片，把错误的剔除，并同时保存对应的ground truth标签
     # https://foolbox.readthedocs.io/en/stable/modules/adversarial.html
 
     test_result = fmodel.forward(adversarials).argmax(axis=-1) == np_target
