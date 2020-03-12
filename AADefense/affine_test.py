@@ -26,9 +26,9 @@ start_param = [[1.0, 0., 0], [0., 1.0, 0]]
 # stop_param = [[1.0, 0., -0.4], [0., 1.0, -0.4]]
 # stop_param = [[1.4, 0., 1], [0., 1.4, 1]]
 # stop_param = [[0.1, 0., 1], [0., 0.1, 1]]
-theta = math.pi / 18
+theta = math.pi / 18 # 旋转theta弧度
 stop_param = [[math.cos(theta), -math.sin(theta), 0.], [math.sin(theta), math.cos(theta), 0]]
-affine_params = np.linspace(start_param, stop_param, num=10)
+affine_params = np.linspace(start_param, stop_param, num=20)
 
 
 def restore_model(address):
@@ -56,7 +56,7 @@ def test(model, criterion, device, test_loader, tag='Test'):
             for i in range(len(affine_params)):
                 affine_param = torch.from_numpy(affine_params[i]).to(device).float()
                 grid = F.affine_grid(affine_param.repeat((data.size()[0], 1, 1)), data.size())
-                trans_data = F.grid_sample(data, grid)
+                trans_data = F.grid_sample(data, grid, align_corners=False)
 
                 output = model(trans_data)
                 batch_loss = criterion(output, target).item()
@@ -78,11 +78,12 @@ if __name__ == '__main__':
     criterion = torch.nn.CrossEntropyLoss()
 
     # lenet mnist
-    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+    kwargs = {'num_workers': 2, 'pin_memory': True} if use_cuda else {}
     batch_size = 200
     model_path = '../../model/lenet_mnist.pth'
     model = restore_model(model_path)
-    file_path_prefix = 'result/aa_lenet_mnist_fsgm'
+    # file_path_prefix = 'result/aa_lenet_mnist_fsgm'
+    file_path_prefix = 'result/aa_lenet_mnist_cw'
     file_path_data = file_path_prefix + '.npy'
     file_path_label = file_path_prefix + '_label.npy'
     # AA数据Test set: Average loss: 0.0061, Accuracy: 0 / 10000(0 %)

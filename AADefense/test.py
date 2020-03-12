@@ -53,7 +53,8 @@ if __name__ == '__main__':
     batch_size = 200
     model_path = '../../model/lenet_mnist.pth'
     model = restore_model(model_path)
-    file_path_prefix = 'result/aa_lenet_mnist_fsgm'
+    # file_path_prefix = 'result/aa_lenet_mnist_fsgm'
+    file_path_prefix = 'result/aa_lenet_mnist_cw'
     file_path_data = file_path_prefix + '.npy'
     file_path_label = file_path_prefix + '_label.npy'
     # AA数据Test set: Average loss: 0.0061, Accuracy: 0 / 10000(0 %)
@@ -65,20 +66,20 @@ if __name__ == '__main__':
     # batch_size = 200
 
     # 自定义 Numpy数据
-    # test_loader = torch.utils.data.DataLoader(
-    #     NumpyDataset(file_path_data, file_path_label, transform=transforms.Compose([
-    #         transforms.ToTensor(),
-    #         # transforms.Normalize((0.1307,), (0.3081,))
-    #     ])),
-    #     batch_size=batch_size, shuffle=False, **kwargs)
-
-    # MNIST 数据
     test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../../data', train=False, transform=transforms.Compose([
+        NumpyDataset(file_path_data, file_path_label, transform=transforms.Compose([
             transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
+            # transforms.Normalize((0.1307,), (0.3081,))
         ])),
         batch_size=batch_size, shuffle=False, **kwargs)
+
+    # MNIST 数据
+    # test_loader = torch.utils.data.DataLoader(
+    #     datasets.MNIST('../../data', train=False, transform=transforms.Compose([
+    #         transforms.ToTensor(),
+    #         transforms.Normalize((0.1307,), (0.3081,))
+    #     ])),
+    #     batch_size=batch_size, shuffle=False, **kwargs)
 
     # cifar10 数据
     # transform = transforms.Compose([
