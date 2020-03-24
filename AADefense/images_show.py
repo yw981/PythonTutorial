@@ -2,12 +2,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # 画图查看
-file_path = 'aa_lenet_mnist_fsgm.npy'
-images = np.load(file_path)
+# file_path_prefix = 'result/aa_lenet_mnist_fsgm'
+file_path_prefix = 'result/aa_lenet_mnist_cw'
+file_path_data = file_path_prefix + '.npy'
+images = np.load(file_path_data)
 
 cnt = 0
-row = 8
-col = 16
+row = 6
+col = 8
 plt.figure(figsize=(col, row))
 for i in range(row):
     for j in range(col):

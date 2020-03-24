@@ -9,7 +9,7 @@ from torchvision import datasets, transforms
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
-kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
 batch_size = 64
 
 model = restore_model()

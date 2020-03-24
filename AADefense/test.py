@@ -92,4 +92,4 @@ if __name__ == '__main__':
     # )
 
     # test(model,criterion, device, train_loader,'Train')
-    test(model, criterion, device, test_loader)
+    test(model, criterion, device, test_loader, file_path_prefix)

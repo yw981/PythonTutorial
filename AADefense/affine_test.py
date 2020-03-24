@@ -20,14 +20,15 @@ import math
 #     [[1.0, 0., 0.], [0.04, 1.0, 0.]],
 # ])
 
+
 # 按区间生成
 start_param = [[1.0, 0., 0], [0., 1.0, 0]]
 # stop_param = [[1.0, 0., 0.2], [0., 1.0, 0.2]]
 # stop_param = [[1.0, 0., -0.4], [0., 1.0, -0.4]]
-# stop_param = [[1.4, 0., 1], [0., 1.4, 1]]
+stop_param = [[1.4, 0., 1], [0., 1.4, 1]]
 # stop_param = [[0.1, 0., 1], [0., 0.1, 1]]
-theta = math.pi / 18 # 旋转theta弧度
-stop_param = [[math.cos(theta), -math.sin(theta), 0.], [math.sin(theta), math.cos(theta), 0]]
+# theta = math.pi / 9  # 旋转theta弧度
+# stop_param = [[math.cos(theta), -math.sin(theta), 0.], [math.sin(theta), math.cos(theta), 0]]
 affine_params = np.linspace(start_param, stop_param, num=20)
 
 
@@ -58,6 +59,9 @@ def test(model, criterion, device, test_loader, tag='Test'):
                 grid = F.affine_grid(affine_param.repeat((data.size()[0], 1, 1)), data.size())
                 trans_data = F.grid_sample(data, grid, align_corners=False)
 
+                # 加均一噪声
+                # trans_data = trans_data + torch.rand(trans_data.shape).to(device) / 1
+
                 output = model(trans_data)
                 batch_loss = criterion(output, target).item()
                 results[i][0] += batch_loss
@@ -67,7 +71,7 @@ def test(model, criterion, device, test_loader, tag='Test'):
     # test_loss /= len(test_loader.dataset)
 
     for i in range(len(affine_params)):
-        print('\n{} set {} : Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+        print('{} set {} : Accumulate loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
             tag, i, results[i][0], results[i][1], len(test_loader.dataset),
             100. * results[i][1] / len(test_loader.dataset)))
 
@@ -78,12 +82,12 @@ if __name__ == '__main__':
     criterion = torch.nn.CrossEntropyLoss()
 
     # lenet mnist
-    kwargs = {'num_workers': 2, 'pin_memory': True} if use_cuda else {}
+    kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
     batch_size = 200
     model_path = '../../model/lenet_mnist.pth'
     model = restore_model(model_path)
-    # file_path_prefix = 'result/aa_lenet_mnist_fsgm'
-    file_path_prefix = 'result/aa_lenet_mnist_cw'
+    file_path_prefix = 'result/aa_lenet_mnist_fsgm'
+    # file_path_prefix = 'result/aa_lenet_mnist_cw'
     file_path_data = file_path_prefix + '.npy'
     file_path_label = file_path_prefix + '_label.npy'
     # AA数据Test set: Average loss: 0.0061, Accuracy: 0 / 10000(0 %)
@@ -103,22 +107,23 @@ if __name__ == '__main__':
         batch_size=batch_size, shuffle=False, **kwargs)
 
     # MNIST 数据
-    # test_loader = torch.utils.data.DataLoader(
-    #     datasets.MNIST('../../data', train=False, transform=transforms.Compose([
-    #         transforms.ToTensor(),
-    #         transforms.Normalize((0.1307,), (0.3081,))
-    #     ])),
-    #     batch_size=batch_size, shuffle=False, **kwargs)
+    test_loader_mnist = torch.utils.data.DataLoader(
+        datasets.MNIST('../../data', train=False, transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,))
+        ])),
+        batch_size=batch_size, shuffle=False, **kwargs)
 
     # cifar10 数据
     # transform = transforms.Compose([
     #     transforms.ToTensor(),
     #     transforms.Normalize((125.3 / 255, 123.0 / 255, 113.9 / 255), (63.0 / 255, 62.1 / 255.0, 66.7 / 255.0)),
     # ])
-    # test_loader = torch.utils.data.DataLoader(
+    # test_loader_cifar10 = torch.utils.data.DataLoader(
     #     datasets.CIFAR10(root='../../data', train=False, download=True, transform=transform),
     #     batch_size=batch_size, shuffle=False
     # )
 
     # test(model,criterion, device, train_loader,'Train')
-    test(model, criterion, device, test_loader)
+    test(model, criterion, device, test_loader_mnist, 'normal')
+    test(model, criterion, device, test_loader, 'AA'+file_path_prefix)
