@@ -8,7 +8,8 @@ class NumpyDataset(data.Dataset):
         self.transform = transform
 
         self.test_data = np.load(data_file_path)
-        # print('self.test_data.shape', self.test_data.shape)
+        print('self.test_data.shape', self.test_data.dtype)
+        print(type(self.test_data))
         self.test_labels = np.load(label_file_path)
 
     def __getitem__(self, index):
