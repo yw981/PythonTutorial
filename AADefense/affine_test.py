@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
     # lenet mnist
     kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
-    batch_size = 200
+    batch_size = 100
     model_path = '../../model/lenet_mnist.pth'
     model = restore_model(model_path)
     file_path_prefix = 'result/aa_lenet_mnist_fsgm'
