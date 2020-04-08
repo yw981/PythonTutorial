@@ -10,7 +10,7 @@ import os
 SAVE_PATH = './result'
 DATA_PATH = '../../data'
 batch_size = 128
-num_epoch = 20
+num_epoch = 100
 z_dimension = 100
 
 # 创建文件夹
@@ -90,6 +90,8 @@ class generator(nn.Module):
 D = discriminator()
 G = generator()
 if torch.cuda.is_available():
+    D = torch.nn.DataParallel(D)
+    G = torch.nn.DataParallel(G)
     D = D.cuda()
     G = G.cuda()
 
