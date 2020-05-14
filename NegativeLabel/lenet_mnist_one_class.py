@@ -35,19 +35,24 @@ def train(args, model, device, train_loader, optimizer, epoch):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        # print(output)
+        print(output)
         # loss = F.nll_loss(output, target)
-        # print(target)
-        labels = torch.zeros(target.size()[0], 10).to(device).scatter_(dim=1, index=torch.unsqueeze(target, dim=1),
-                                                                       value=1)
-        # print(labels)
-        labels = 1 - labels
+        print(target)
+        labels = torch.zeros_like(target)
+        labels[target == TARGET] = 1
+        # labels = torch.zeros(target.size()[0], 10).to(device).scatter_(dim=1, index=torch.unsqueeze(target, dim=1),
+        #                                                                value=1)
+        print(labels)
+        # exit(0)
+        # labels = 1 - labels
         # print(labels)
         # log_prob = torch.nn.functional.log_softmax(score, dim=1)
-        loss = -(torch.sum(output * labels) + 2*torch.sum((1 - output) * (1 - labels))) / target.size()[0]
+        # loss = -(np.dot(Y,np.log(A.T))+np.dot(np.log(1-A),(1-Y).T))/m
+        loss = -(torch.sum(torch.log(output) * labels) + torch.sum(torch.log(1 - output) * (1 - labels))) / target.size()[0]
+        # loss = -(torch.sum(output * labels) + torch.sum((1 - output) * (1 - labels))) / target.size()[0]
         # loss = torch.nn.MSELoss()(output, target)
-        # print(loss)
-        # exit(0)
+        print(loss)
+        exit(0)
 
         loss.backward()
 
@@ -86,7 +91,7 @@ def test(args, model, device, test_loader):
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--batch-size', type=int, default=1000, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=6, metavar='N',
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')

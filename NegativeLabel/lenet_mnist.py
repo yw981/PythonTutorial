@@ -43,7 +43,10 @@ def train(args, model, device, train_loader, optimizer, epoch):
         labels = 1 - labels
         # print(labels)
         # log_prob = torch.nn.functional.log_softmax(score, dim=1)
-        loss = -(torch.sum(output * labels) + 2*torch.sum((1 - output) * (1 - labels))) / target.size()[0]
+        loss = -(torch.sum(torch.log(output) * labels) + torch.sum(torch.log(1 - output) * (1 - labels))) / \
+               target.size()[0]
+
+        # loss = -(torch.sum(output * labels) + 2*torch.sum((1 - output) * (1 - labels))) / target.size()[0]
         # loss = torch.nn.MSELoss()(output, target)
         # print(loss)
         # exit(0)
@@ -61,7 +64,7 @@ def test(args, model, device, test_loader):
     model.eval()
     # test_loss = 0
     correct = 0
-    isFirst = True
+    isFirst = False
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
@@ -85,13 +88,13 @@ def test(args, model, device, test_loader):
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--batch-size', type=int, default=1000, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=100, metavar='N',
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=10, metavar='N',
+    parser.add_argument('--epochs', type=int, default=20, metavar='N',
                         help='number of epochs to train (default: 10)')
-    parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
+    parser.add_argument('--lr', type=float, default=0.0001, metavar='LR',
                         help='learning rate (default: 0.01)')
     parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                         help='SGD momentum (default: 0.5)')
