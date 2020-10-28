@@ -97,7 +97,7 @@ logit = net(img_variable)
 # # 使用本地的 LABELS_PATH
 with open(LABELS_PATH) as f:
     data = json.load(f).items()
-    classes = {int(key):value for (key, value) in data}
+    classes = {int(key): value for (key, value) in data}
 # 使用softmax打分
 h_x = F.softmax(logit, dim=1).data.squeeze()  # 分类分值
 # 对分类的预测类别分值排序，输出预测值和在列表中的位置
@@ -119,4 +119,4 @@ height, width, _ = img.shape
 # 生成热度图
 heatmap = cv2.applyColorMap(cv2.resize(CAMs[0], (width, height)), cv2.COLORMAP_JET)
 result = heatmap * 0.3 + img * 0.5
-cv2.imwrite(img_path+'CAM.jpg', result)
+cv2.imwrite(img_path + 'CAM.jpg', result)
